@@ -6,6 +6,7 @@ import axios from "axios";
 import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import helmet from "helmet";
 
 // Setup __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +16,28 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
-app.use(cors()); // allow frontend requests
+app.use(cors());
+app.use(helmet({
+  frameguard: {         // configure
+    action: 'deny'
+  },
+  contentSecurityPolicy: {    // enable and configure
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ['style.com'],
+    }
+  },
+  dnsPrefetchControl: false     // disable
+}));
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'",'trusted-cdn.com'],
+      
+    },
+  })
+);
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "dist")));
